@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marwan مروان | Cyberpunk Portfolio</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;700;900&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-dark: #050508;
+            --neon-blue: #00f3ff;
+            --neon-purple: #b100ff;
+            --text-main: #ffffff;
+            --text-muted: #a0a0a0;
+            --glass-bg: rgba(20, 20, 30, 0.45);
+            --glass-border: rgba(0, 243, 255, 0.2);
+            --glow-blue: 0 0 25px rgba(0, 243, 255, 0.6);
+            --glow-purple: 0 0 25px rgba(177, 0, 255, 0.6);
+            --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Fira Code', 'Cairo', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        ::-webkit-scrollbar-thumb { 
+            background: linear-gradient(to bottom, var(--neon-blue), var(--neon-purple)); 
+            border-radius: 10px; 
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 15px rgba(0, 243, 255, 0.4); }
+            50% { box-shadow: 0 0 35px rgba(177, 0, 255, 0.7); }
+            100% { box-shadow: 0 0 15px rgba(0, 243, 255, 0.4); }
+        }
+
+        @keyframes border-glow {
+            0% { border-color: rgba(0, 243, 255, 0.3); }
+            50% { border-color: rgba(177, 0, 255, 0.6); }
+            100% { border-color: rgba(0, 243, 255, 0.3); }
+        }
+
+        @keyframes text-shimmer {
+            0% { background-position: -200% center; }
+            100% { background-position: 200% center; }
+        }
+
+        /* Background Canvas */
+        #particles-canvas {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: -1;
+            opacity: 0.5;
+        }
+
+        #intro-screen {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at center, #101018 0%, var(--bg-dark) 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            transition: opacity 0.8s ease, visibility 0.8s;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .enter-btn {
+            background: rgba(0, 0, 0, 0.7);
+            color: var(--text-main);
+            border: 2px solid var(--neon-blue);
+            padding: 20px 40px;
+            font-size: 1.8rem;
+            font-weight: 800;
+            border-radius: 15px;
+            cursor: pointer;
+            box-shadow: var(--glow-blue);
+            font-family: 'Cairo', sans-serif;
+            animation: pulse-glow 2s infinite;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .enter-btn i { font-size: 2rem; }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 1s ease;
+            display: none;
+        }
+        
+        .container.active {
+            opacity: 1;
+            transform: translateY(0);
+            display: block;
+        }
+
+        /* Header Section */
+        .header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .profile-wrapper {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--neon-blue), var(--neon-purple));
+            padding: 5px;
+            margin-bottom: 20px;
+            animation: float 4s ease-in-out infinite, pulse-glow 3s infinite;
+        }
+
+        .profile-img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid var(--bg-dark);
+        }
+
+        .name-main {
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            font-weight: 900;
+            margin: 10px 0 0 0;
+            background: linear-gradient(to right, #fff, var(--neon-blue), #fff);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: text-shimmer 4s linear infinite;
+        }
+
+        .nickname {
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
+            color: var(--neon-purple);
+            font-weight: 800;
+            margin-top: 5px;
+            text-shadow: var(--glow-purple);
+            letter-spacing: 3px;
+            animation: float 3s ease-in-out infinite alternate;
+        }
+
+        .section-title {
+            font-size: clamp(1.8rem, 5vw, 2.2rem);
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: var(--neon-blue);
+            text-shadow: 0 0 10px rgba(0, 243, 255, 0.4);
+            border-bottom: 2px solid rgba(0, 243, 255, 0.2);
+            padding-bottom: 10px;
+            width: fit-content;
+        }
+
+        .grid-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+            margin-bottom: 60px;
+        }
+
+        .card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 25px 20px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            animation: float 5s ease-in-out infinite, border-glow 4s infinite;
+        }
+        
+        /* Stagger animations slightly for organic feel */
+        .card:nth-child(2) { animation-delay: 0.5s; }
+        .card:nth-child(3) { animation-delay: 1s; }
+        .card:nth-child(4) { animation-delay: 1.5s; }
+        .card:nth-child(5) { animation-delay: 2s; }
+
+        .card-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: var(--neon-purple);
+            filter: drop-shadow(0 0 8px rgba(177, 0, 255, 0.8));
+            animation: float 3s infinite ease-in-out alternate;
+        }
+
+        .card-title {
+            font-size: 1rem;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .card-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .arabic-text {
+            font-family: 'Cairo', sans-serif;
+            direction: rtl;
+        }
+
+        .islamic-section {
+            background: linear-gradient(135deg, rgba(10,10,15,0.9), rgba(5,5,10,0.9));
+            border-radius: 20px;
+            padding: 40px 20px;
+            text-align: center;
+            margin-bottom: 60px;
+            border: 1px solid var(--neon-blue);
+            animation: pulse-glow 4s infinite alternate;
+            direction: rtl;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        .quran-text {
+            font-family: 'Amiri', serif;
+            font-size: clamp(2rem, 5vw, 2.5rem);
+            color: #e2c044;
+            margin-bottom: 20px;
+            text-shadow: 0 0 15px rgba(226, 192, 68, 0.4);
+            line-height: 1.5;
+        }
+
+        .dua-text {
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+            color: var(--neon-blue);
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .wisdom-text {
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+            color: var(--text-muted);
+            font-style: italic;
+            border-top: 1px dashed var(--glass-border);
+            padding-top: 15px;
+            display: inline-block;
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .contact-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            padding: 20px;
+            border-radius: 15px;
+            text-decoration: none;
+            color: #fff;
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: var(--glass-bg);
+            border: 2px solid;
+            animation: float 4s infinite, border-glow 2s infinite alternate;
+        }
+
+        .contact-btn i { font-size: 2.2rem; }
+        
+        .btn-telegram { border-color: #0088cc; box-shadow: 0 0 15px rgba(0, 136, 204, 0.4); }
+        .btn-whatsapp { border-color: #25D366; box-shadow: 0 0 15px rgba(37, 211, 102, 0.4); }
+
+        footer {
+            text-align: center;
+            padding: 30px 20px;
+            border-top: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            margin-top: 40px;
+        }
+        
+        footer span {
+            color: var(--neon-blue);
+            font-weight: 800;
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="bg-audio" loop>
+        <source src="1.mp3" type="audio/mpeg">
+    </audio>
+
+    <canvas id="particles-canvas"></canvas>
+
+    <div id="intro-screen">
+        <button class="enter-btn arabic-text" onclick="startExperience()">
+            دوس هنا عشان تعرفني <i class="fa-solid fa-fingerprint"></i>
+        </button>
+    </div>
+
+    <div class="container" id="main-content">
+        
+        <header class="header">
+            <div class="profile-wrapper">
+                <img src="1.jpg" onerror="this.onerror=null;this.src='https://placehold.co/400x400/050508/00f3ff?text=Maro';" alt="Marwan" class="profile-img">
+            </div>
+            <h1 class="name-main">Marwan مروان</h1>
+            <h2 class="nickname">Maro</h2>
+        </header>
+
+        <h2 class="section-title"><i class="fa-solid fa-user-astronaut"></i> ID_Card</h2>
+        
+        <div class="grid-cards">
+            <div class="card">
+                <i class="fa-solid fa-hourglass-half card-icon"></i>
+                <div class="card-title">Age</div>
+                <div class="card-value" id="age-display">Calculating...</div>
+            </div>
+            <div class="card">
+                <i class="fa-solid fa-location-dot card-icon"></i>
+                <div class="card-title">Location</div>
+                <div class="card-value arabic-text">مصر، القاهرة</div>
+            </div>
+            <div class="card">
+                <i class="fa-solid fa-shield-halved card-icon"></i>
+                <div class="card-title">Club</div>
+                <div class="card-value arabic-text">لاعب بنادي طلائع الجيش</div>
+            </div>
+            <div class="card">
+                <i class="fa-solid fa-graduation-cap card-icon"></i>
+                <div class="card-title">Status</div>
+                <div class="card-value" style="font-size: 1.1rem;">High School Student<br>(Surviving, not thriving)</div>
+            </div>
+        </div>
+
+        <h2 class="section-title"><i class="fa-solid fa-microchip"></i> Skills_&_Hobbies</h2>
+        <div class="grid-cards" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+            <div class="card">
+                <div style="font-size: 2.5rem; color:#ff4757; margin-bottom: 10px; animation: float 2s infinite alternate;">
+                    <i class="fa-solid fa-hand-fist"></i> <i class="fa-solid fa-dumbbell"></i>
+                </div>
+                <div class="card-title">Hobbies</div>
+                <div class="card-value">Wrestling, Programming</div>
+            </div>
+            <div class="card">
+                <div style="font-size: 2.5rem; color:var(--neon-blue); margin-bottom: 10px; animation: float 2.5s infinite alternate;">
+                    <i class="fa-brands fa-python"></i> <i class="fa-brands fa-node-js" style="color:#339933;"></i>
+                </div>
+                <div class="card-title">Tech Stack</div>
+                <div class="card-value">Python & Node.js</div>
+            </div>
+        </div>
+
+        <div class="islamic-section">
+            <h3 class="quran-text">﴿ وَمَا تَوْفِيقِي إِلَّا بِاللَّهِ ﴾</h3>
+            <p class="dua-text">اللهم اجعل عملي كله صالحاً، واجعله لوجهك خالصاً 🤲</p>
+            <p class="wisdom-text">"لا تحسبن المجد تمراً أنت آكله، لن تبلغ المجد حتى تلعق الصبرا"</p>
+        </div>
+
+        <h2 class="section-title" style="justify-content: center; width: 100%; border: none;">
+            <i class="fa-solid fa-satellite-dish"></i> Transmit_Message
+        </h2>
+        <div class="contact-grid">
+            <a href="https://t.me/HY_09" target="_blank" class="contact-btn btn-telegram">
+                <i class="fa-brands fa-telegram"></i> @HY_09
+            </a>
+            <a href="https://wa.me/@HY_09" target="_blank" class="contact-btn btn-whatsapp">
+                <i class="fa-brands fa-whatsapp"></i> WhatsApp
+            </a>
+        </div>
+
+    </div>
+
+    <footer>
+        © 2026 Made by <span>Maro</span> | Telegram: @HY_09
+    </footer>
+
+    <script>
+        // Calculate Age
+        function calculateAge() {
+            const birthDate = new Date('2009-05-17');
+            const today = new Date(); 
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const m = today.getMonth() - birthDate.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            document.getElementById('age-display').innerText = age + ' Years Old';
+        }
+        calculateAge();
+
+        // Welcome Screen & Audio Experience
+        function startExperience() {
+            const intro = document.getElementById('intro-screen');
+            const content = document.getElementById('main-content');
+            const audio = document.getElementById('bg-audio');
+            
+            audio.volume = 0.5;
+            audio.play().catch(e => console.log("Audio play blocked by browser policies."));
+
+            intro.style.opacity = '0';
+            setTimeout(() => {
+                intro.style.display = 'none';
+                content.classList.add('active');
+            }, 800);
+        }
+
+        // Particles Animation Logic
+        const canvas = document.getElementById('particles-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height, particles = [];
+
+        function resizeCanvas() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.size = Math.random() * 2.5 + 0.5;
+                // Faster movement for "alive" feel
+                this.speedX = (Math.random() - 0.5) * 1.5;
+                this.speedY = (Math.random() - 0.5) * 1.5;
+                this.color = Math.random() > 0.5 ? '#00f3ff' : '#b100ff';
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x > width) this.x = 0;
+                if (this.x < 0) this.x = width;
+                if (this.y > height) this.y = 0;
+                if (this.y < 0) this.y = height;
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            const particleCount = Math.min(Math.floor(window.innerWidth / 12), 100);
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, width, height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            
+            // Connect particles
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < 130) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = `rgba(0, 243, 255, ${0.1 - distance/1300})`;
+                        ctx.lineWidth = 0.8;
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(animateParticles);
+        }
+
+        initParticles();
+        animateParticles();
+    </script>
+</body>
+</html>
